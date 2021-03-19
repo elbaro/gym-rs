@@ -1,0 +1,13 @@
+[package]
+name = "atari-env"
+version = "0.1.0"
+authors = ["elbaro <elbaro@users.noreply.github.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+atari-env-sys = { path = "../atari-env-sys" }
+image = "0.23.14"
+minifb = "0.19.2"
+viuer = "0.4.0"
