@@ -15,8 +15,9 @@ impl Drop for Ale {
 }
 
 impl Ale {
-    pub fn new(game: Game) -> Self {
-        let rom_path = CString::new("tetris.bin").unwrap();
+    pub fn new(rom_path: &Path) -> Self {
+        use std::os::unix::ffi::OsStrExt;
+        let rom_path = CString::new(rom_path.as_os_str().as_bytes()).unwrap();
         let ale = unsafe { atari_env_sys::ALE_new() };
         unsafe {
             atari_env_sys::loadROM(ale, rom_path.as_ptr());

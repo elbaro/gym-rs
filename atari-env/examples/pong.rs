@@ -69,7 +69,10 @@ fn main() {
     let mut pixels = pixels::Pixels::new(env.width(), env.height(), surface_texture).unwrap();
 
     loop {
-        env.step(1);
+        println!("step {}", env.step(0));
+        println!("step {}", env.step(0));
+        println!("step {}", env.step(0));
+        println!("step {}", env.step(0));
         env.render_rgb32(pixels.get_frame());
         pixels.render().unwrap();
         window.request_redraw();

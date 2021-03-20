@@ -1,7 +1,6 @@
 mod ale;
 mod game;
 use ale::Ale;
-use game::Game;
 
 pub struct AtariEnv {
     _game: String,
@@ -22,8 +21,10 @@ pub enum ObservationType {
 }
 
 impl AtariEnv {
-    pub fn new(
-        game: String,
+    /// about frame-skipping and action-repeat,
+    /// see https://danieltakeshi.github.io/2016/11/25/frame-skipping-and-preprocessing-for-deep-q-networks-on-atari-2600-games/
+    pub fn new<P: AsRef<Path>>(
+        rom_path: P,
         render_mode: RenderMode,
         // difficulty: i32,
         observation_type: ObservationType,
@@ -31,10 +32,8 @@ impl AtariEnv {
     ) -> Self {
         Self {
             _game: game,
-            _render_mode: render_mode,
-            _observation_type: observation_type,
             _frameskip_range: frameskip_range,
-            ale: Ale::new(Game::Tetris),
+            ale: Ale::new(rom_path.as_ref()),
         }
     }
 
