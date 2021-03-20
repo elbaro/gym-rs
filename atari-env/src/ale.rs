@@ -33,6 +33,11 @@ impl Ale {
         buf
     }
 
+    pub fn take_action(&self, action: i32) -> i32 {
+        let ret: ::std::os::raw::c_int = unsafe { atari_env_sys::act(self.inner, action) };
+        ret.into()
+    }
+
     pub fn lives(&self) -> u32 {
         unsafe { atari_env_sys::lives(self.inner) as u32 }
     }
@@ -44,28 +49,42 @@ impl Ale {
         unsafe { atari_env_sys::getScreenHeight(self.inner) as u32 }
     }
 
-    pub fn rgb32_size(&self) -> usize {
-        return (self.width() as usize) * (self.height() as usize) * 4;
+    pub fn rgb24_size(&self) -> usize {
+        return (self.width() as usize) * (self.height() as usize) * 3;
     }
-    pub fn rgb32(&self, buf: &mut [u8]) {
+    /// bgr on little-endian, rgb on big-endian
+    pub fn rgb24_native_endian(&self, buf: &mut [u8]) {
         unsafe {
             atari_env_sys::getScreenRGB(self.inner, buf.as_mut_ptr());
         }
     }
-
-    pub fn rgb24_size(&self) -> usize {
-        return (self.width() as usize) * (self.height() as usize) * 3;
-    }
+    /// always rgb in regardless of endianness
     pub fn rgb24(&self, buf: &mut [u8]) {
         unsafe {
             atari_env_sys::getScreenRGB2(self.inner, buf.as_mut_ptr());
         }
     }
 
+    /// always rgb in regardless of endianness
+    pub fn rgb32(&self, buf: &mut [u8]) {
+        let n = buf.len() / 4;
+        self.rgb24(&mut buf[n..]);
+        for i in 0..n {
+            buf[i * 4 + 0] = buf[n + (i * 3) + 0];
+            buf[i * 4 + 1] = buf[n + (i * 3) + 1];
+            buf[i * 4 + 2] = buf[n + (i * 3) + 2];
+            buf[i * 4 + 3] = 0;
+        }
+    }
+
     pub fn save_png<P: AsRef<Path>>(&self, path: P) {
+        use std::os::unix::ffi::OsStrExt;
         let path = path.as_ref();
         unsafe {
-            atari_env_sys::saveScreenPNG(self.inner, path.as_ptr());
+            atari_env_sys::saveScreenPNG(
+                self.inner,
+                CString::new(path.as_os_str().as_bytes()).unwrap().as_ptr(),
+            );
         }
     }
 }

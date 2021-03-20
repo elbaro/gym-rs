@@ -38,32 +38,22 @@ impl AtariEnv {
         }
     }
 
-    pub fn step(&self, action: i32) {
-        let ret = self.ale.step();
-        println!("step return: {}", ret);
+    pub fn width(&self) -> u32 {
+        self.ale.width()
+    }
+    pub fn height(&self) -> u32 {
+        self.ale.height()
     }
 
-    pub fn render(&self) {
-        let w: u32 = self.ale.width();
-        let h: u32 = self.ale.width();
-        let mut buf = vec![0; (w * h * 3) as usize];
+    pub fn step(&self, action: i32) -> i32 {
+        let ret = self.ale.take_action(action);
+        ret
+    }
 
-        unsafe {
-            atari_env_sys::getScreenRGB2(self.ale, buf.as_mut_ptr());
-        }
-
-        let img = image::DynamicImage::ImageRgb8(image::RgbImage::from_raw(w, h, buf).unwrap());
-
-        viuer::print(
-            &img,
-            &viuer::Config {
-                x: 0,
-                y: 0,
-                use_kitty: true,
-                width: Some(w),
-                height: Some(h),
-                ..Default::default()
-            },
-        );
+    pub fn render_rgb32(&self, buf: &mut [u8]) {
+        self.ale.rgb32(buf);
+    }
+    pub fn render_rgb24(&self, buf: &mut [u8]) {
+        self.ale.rgb24(buf);
     }
 }

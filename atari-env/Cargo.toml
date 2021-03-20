@@ -10,4 +10,8 @@ edition = "2018"
 atari-env-sys = { path = "../atari-env-sys" }
 image = "0.23.14"
 minifb = "0.19.2"
+pixels = "0.2.0"
 viuer = "0.4.0"
+wgpu = "0.7.0"
+winit = "0.24.0"
+winit_input_helper = "0.9.0"
