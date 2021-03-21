@@ -1,8 +1,7 @@
-use atari_env::{AtariEnv, ObservationType, RenderMode};
+use atari_env::{AtariEnv, EmulatorConfig};
 use pixels::SurfaceTexture;
 use winit::dpi::{LogicalPosition, LogicalSize, PhysicalSize};
-use winit::event::VirtualKeyCode;
-use winit::event_loop::{ControlFlow, EventLoop};
+use winit::event_loop::EventLoop;
 use winit_input_helper::WinitInputHelper;
 
 fn create_window(
@@ -55,24 +54,25 @@ fn create_window(
 
 fn main() {
     let env = AtariEnv::new(
-        "pong".to_string(),
-        RenderMode::Human,
-        ObservationType::Image,
-        (0, 0),
+        "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/zaxxon.bin".to_string(),
+        EmulatorConfig {
+            display_screen: true,
+            sound: true,
+            ..EmulatorConfig::default()
+        },
     );
 
     let event_loop = EventLoop::new();
-    let mut input = WinitInputHelper::new();
     let (window, p_width, p_height, mut _hidpi_factor) =
         create_window("asdf", env.width() as f64, env.height() as f64, &event_loop);
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
     let mut pixels = pixels::Pixels::new(env.width(), env.height(), surface_texture).unwrap();
 
     loop {
-        println!("step {}", env.step(0));
-        println!("step {}", env.step(0));
-        println!("step {}", env.step(0));
-        println!("step {}", env.step(0));
+        env.step(0);
+        env.step(0);
+        env.step(0);
+        env.step(0);
         env.render_rgb32(pixels.get_frame());
         pixels.render().unwrap();
         window.request_redraw();

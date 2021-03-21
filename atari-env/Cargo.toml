@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 atari-env-sys = { path = "../atari-env-sys" }
+c_str_macro = "1.0.2"
 image = "0.23.14"
 minifb = "0.19.2"
 pixels = "0.2.0"

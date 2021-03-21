@@ -1,12 +1,11 @@
 mod ale;
 mod game;
 use ale::Ale;
+use std::path::Path;
+
+pub use ale::AleConfig as EmulatorConfig;
 
 pub struct AtariEnv {
-    _game: String,
-    _render_mode: RenderMode,
-    _observation_type: ObservationType,
-    _frameskip_range: (u8, u8),
     ale: Ale,
 }
 
@@ -25,15 +24,13 @@ impl AtariEnv {
     /// see https://danieltakeshi.github.io/2016/11/25/frame-skipping-and-preprocessing-for-deep-q-networks-on-atari-2600-games/
     pub fn new<P: AsRef<Path>>(
         rom_path: P,
-        render_mode: RenderMode,
-        // difficulty: i32,
-        observation_type: ObservationType,
-        frameskip_range: (u8, u8),
+        // render_mode: RenderMode,
+        // // difficulty: i32,
+        // observation_type: ObservationType,
+        emulator_config: EmulatorConfig,
     ) -> Self {
         Self {
-            _game: game,
-            _frameskip_range: frameskip_range,
-            ale: Ale::new(rom_path.as_ref()),
+            ale: Ale::new(rom_path.as_ref(), emulator_config),
         }
     }
 
@@ -43,7 +40,12 @@ impl AtariEnv {
     pub fn height(&self) -> u32 {
         self.ale.height()
     }
-
+    pub fn available_actions(&self) -> Vec<i32> {
+        self.ale.available_actions()
+    }
+    pub fn minimal_actions(&self) -> Vec<i32> {
+        self.ale.minimal_actions()
+    }
     pub fn step(&self, action: i32) -> i32 {
         let ret = self.ale.take_action(action);
         ret
