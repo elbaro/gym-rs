@@ -56,11 +56,13 @@ fn create_window(
 fn main() {
     let mut env = AtariEnv::new(
         // "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/zaxxon.bin".to_string(),
-        "atari-env/tetris.bin".to_string(),
+        // "atari-env/tetris.bin".to_string(),
+        "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/space_invaders.bin"
+            .to_string(),
         EmulatorConfig {
             // display_screen: true,
             // sound: true,
-            frame_skip: 2,
+            frame_skip: 1,
             color_averaging: false,
             ..EmulatorConfig::default()
         },
