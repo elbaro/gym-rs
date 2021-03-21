@@ -3,6 +3,8 @@ use std::ffi::CString;
 use std::path::Path;
 use std::path::PathBuf;
 
+#[derive(Copy, Clone, Debug)]
+#[repr(i32)]
 pub enum AleAction {
     Noop = 0,
     Fire = 1,
@@ -99,20 +101,20 @@ impl Ale {
 
         Self { inner: ale }
     }
-    pub fn available_actions(&self) -> Vec<i32> {
+    pub fn available_actions(&self) -> Vec<AleAction> {
         let n = unsafe { atari_env_sys::getLegalActionSize(self.inner) } as usize;
-        let mut buf = vec![0; n];
+        let mut buf = vec![AleAction::Noop; n];
         unsafe {
-            atari_env_sys::getLegalActionSet(self.inner, buf.as_mut_ptr());
+            atari_env_sys::getLegalActionSet(self.inner, buf.as_mut_ptr() as *mut i32);
         }
         buf
     }
 
-    pub fn minimal_actions(&self) -> Vec<i32> {
+    pub fn minimal_actions(&self) -> Vec<AleAction> {
         let n = unsafe { atari_env_sys::getMinimalActionSize(self.inner) } as usize;
-        let mut buf = vec![0; n];
+        let mut buf = vec![AleAction::Noop; n];
         unsafe {
-            atari_env_sys::getMinimalActionSet(self.inner, buf.as_mut_ptr());
+            atari_env_sys::getMinimalActionSet(self.inner, buf.as_mut_ptr() as *mut i32);
         }
         buf
     }

@@ -24,11 +24,14 @@ impl AtariEnv {
     pub fn height(&self) -> u32 {
         self.ale.height()
     }
-    pub fn available_actions(&self) -> Vec<i32> {
+    pub fn available_actions(&self) -> Vec<AtariAction> {
         self.ale.available_actions()
     }
-    pub fn minimal_actions(&self) -> Vec<i32> {
+    pub fn minimal_actions(&self) -> Vec<AtariAction> {
         self.ale.minimal_actions()
+    }
+    pub fn is_game_over(&self) -> bool {
+        self.ale.is_game_over()
     }
 
     pub fn reset(&mut self) {

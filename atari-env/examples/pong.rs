@@ -1,5 +1,7 @@
 use atari_env::{AtariAction, AtariEnv, EmulatorConfig};
 use pixels::SurfaceTexture;
+use rand::seq::SliceRandom;
+use rand::Rng;
 use winit::dpi::{LogicalPosition, LogicalSize, PhysicalSize};
 use winit::event_loop::EventLoop;
 
@@ -70,10 +72,21 @@ fn main() {
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
     let mut pixels = pixels::Pixels::new(env.width(), env.height(), surface_texture).unwrap();
 
+    let actions = env.minimal_actions();
+    println!("action set: {:?}", actions);
+
     loop {
-        env.step(AtariAction::Left);
-        env.render_rgb32(pixels.get_frame());
-        pixels.render().unwrap();
-        window.request_redraw();
+        while !env.is_game_over() {
+            let action = if rand::thread_rng().gen::<bool>() {
+                *actions.choose(&mut rand::thread_rng()).unwrap()
+            } else {
+                AtariAction::Noop
+            };
+            env.step(action);
+            env.render_rgb32(pixels.get_frame());
+            pixels.render().unwrap();
+            window.request_redraw();
+        }
+        env.reset();
     }
 }
