@@ -9,16 +9,6 @@ pub struct AtariEnv {
     ale: Ale,
 }
 
-pub enum RenderMode {
-    Human,
-    RgbArray,
-}
-
-pub enum ObservationType {
-    Ram,
-    Image,
-}
-
 impl AtariEnv {
     /// about frame-skipping and action-repeat,
     /// see <https://danieltakeshi.github.io/2016/11/25/frame-skipping-and-preprocessing-for-deep-q-networks-on-atari-2600-games/>
