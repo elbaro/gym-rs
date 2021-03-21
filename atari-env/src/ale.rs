@@ -3,6 +3,32 @@ use std::ffi::CString;
 use std::path::Path;
 use std::path::PathBuf;
 
+pub enum AleAction {
+    Noop = 0,
+    Fire = 1,
+    Up = 2,
+    Right = 3,
+    Left = 4,
+    Down = 5,
+    UpRight = 6,
+    UpLeft = 7,
+    DownRight = 8,
+    DownLeft = 9,
+    UpFire = 10,
+    RightFire = 11,
+    LeftFire = 12,
+    DownFire = 13,
+    UpRightFire = 14,
+    UpLeftFire = 15,
+    DownRightFire = 16,
+    DownLeftFire = 17,
+    // admin actions
+    // Reset = 40,
+    // SaveState = 43,
+    // LoadState = 44,
+    // SystemReset = 45,
+}
+
 pub struct AleConfig {
     pub random_seed: i32, // if 0, set to time
     pub display_screen: bool,
@@ -91,8 +117,29 @@ impl Ale {
         buf
     }
 
-    pub fn take_action(&self, action: i32) -> i32 {
-        let ret: ::std::os::raw::c_int = unsafe { atari_env_sys::act(self.inner, action) };
+    pub fn is_game_over(&self) -> bool {
+        unsafe { atari_env_sys::game_over(self.inner) }
+    }
+
+    /// frame number since rom loading (Ale::new)
+    pub fn rom_frame_number(&self) -> i32 {
+        unsafe { atari_env_sys::getFrameNumber(self.inner) }
+    }
+
+    /// frame number of the current episode
+    pub fn episode_frame_number(&self) -> i32 {
+        unsafe { atari_env_sys::getEpisodeFrameNumber(self.inner) }
+    }
+
+    pub fn reset(&mut self) {
+        unsafe {
+            atari_env_sys::reset_game(self.inner);
+        }
+    }
+
+    /// returns reward
+    pub fn take_action(&mut self, action: AleAction) -> i32 {
+        let ret: ::std::os::raw::c_int = unsafe { atari_env_sys::act(self.inner, action as i32) };
         ret.into()
     }
 
@@ -123,6 +170,9 @@ impl Ale {
         }
     }
 
+    pub fn rgb32_size(&self) -> usize {
+        return (self.width() as usize) * (self.height() as usize) * 4;
+    }
     /// always rgb in regardless of endianness
     pub fn rgb32(&self, buf: &mut [u8]) {
         let n = buf.len() / 4;
@@ -135,14 +185,21 @@ impl Ale {
         }
     }
 
+    pub fn ram_size(&self) -> usize {
+        unsafe { atari_env_sys::getRAMSize(self.inner) as usize }
+    }
+    pub fn ram(&self, buf: &mut [u8]) {
+        unsafe {
+            atari_env_sys::getRAM(self.inner, buf.as_mut_ptr());
+        }
+    }
+
     pub fn save_png<P: AsRef<Path>>(&self, path: P) {
         use std::os::unix::ffi::OsStrExt;
         let path = path.as_ref();
+        let path = CString::new(path.as_os_str().as_bytes()).unwrap();
         unsafe {
-            atari_env_sys::saveScreenPNG(
-                self.inner,
-                CString::new(path.as_os_str().as_bytes()).unwrap().as_ptr(),
-            );
+            atari_env_sys::saveScreenPNG(self.inner, path.as_ptr());
         }
     }
 }

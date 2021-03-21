@@ -1,8 +1,7 @@
-use atari_env::{AtariEnv, EmulatorConfig};
+use atari_env::{AtariAction, AtariEnv, EmulatorConfig};
 use pixels::SurfaceTexture;
 use winit::dpi::{LogicalPosition, LogicalSize, PhysicalSize};
 use winit::event_loop::EventLoop;
-use winit_input_helper::WinitInputHelper;
 
 fn create_window(
     title: &str,
@@ -53,11 +52,14 @@ fn create_window(
 }
 
 fn main() {
-    let env = AtariEnv::new(
-        "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/zaxxon.bin".to_string(),
+    let mut env = AtariEnv::new(
+        // "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/zaxxon.bin".to_string(),
+        "atari-env/tetris.bin".to_string(),
         EmulatorConfig {
-            display_screen: true,
-            sound: true,
+            // display_screen: true,
+            // sound: true,
+            frame_skip: 2,
+            color_averaging: false,
             ..EmulatorConfig::default()
         },
     );
@@ -69,10 +71,7 @@ fn main() {
     let mut pixels = pixels::Pixels::new(env.width(), env.height(), surface_texture).unwrap();
 
     loop {
-        env.step(0);
-        env.step(0);
-        env.step(0);
-        env.step(0);
+        env.step(AtariAction::Left);
         env.render_rgb32(pixels.get_frame());
         pixels.render().unwrap();
         window.request_redraw();
