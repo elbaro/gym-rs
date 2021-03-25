@@ -6,7 +6,7 @@ edition = "2018"
 description = "FFI bindings for ALE (Arcade Learning Environment)"
 repository = "https://github.com/elbaro/gym-rs"
 license = "GPL-2.0-or-later"
-keywords = ["machine learning", "rl", "gym", "atari"]
+keywords = ["learning", "rl", "ml", "gym", "atari"]
 categories = ["science", "simulation", "external-ffi-bindings", "emulators"]
 
 [features]
