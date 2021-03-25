@@ -9,7 +9,7 @@ license = "GPL-2.0-or-later"
 license-file = "LICENSE.txt"
 readme = "README.md"
 keywords = ["machine learning", "rl", "gym", "atari"]
-categories = ["multimedia::images", "external-ffi-bindings"]
+categories = ["science", "simulation", "external-ffi-bindings", "emulators"]
 
 [features]
 default = ["sdl"]

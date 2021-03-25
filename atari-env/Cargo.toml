@@ -3,6 +3,13 @@ name = "atari-env"
 version = "0.1.0"
 authors = ["elbaro <elbaro@users.noreply.github.com>"]
 edition = "2018"
+description = "Atari Environment for Reinforcement Learning"
+repository = "https://github.com/elbaro/gym-rs"
+license = "GPL-2.0-or-later"
+license-file = "LICENSE.txt"
+readme = "README.md"
+keywords = ["learning", "rl", "ml", "gym", "atari"]
+categories = ["science", "simulation", "api-bindings", "emulators"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
