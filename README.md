@@ -4,11 +4,11 @@
 cargo run --example pong
 ```
 
-
 ## License
 Crates          | License
 ----------------|--------
 `gym`           | MIT
+`gym-core`      | MIT
 `atari-env`     | GPL v2
 `atari-env-sys` | GPL v2
 
