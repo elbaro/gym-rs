@@ -13,7 +13,7 @@ categories = ["science", "simulation", "api-bindings", "emulators"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-atari-env-sys = { path = "../atari-env-sys" }
+atari-env-sys = { version = "0.1.0", path = "../atari-env-sys" }
 c_str_macro = "1.0.2"
 image = "0.23.14"
 minifb = "0.19.2"
