@@ -1,7 +1,9 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+mod exports {
+    #[cfg(feature = "atari")]
+    pub use atari_env as atari;
+
+    #[cfg(feature = "openspiel")]
+    pub use openspiel_env as openspiel;
 }
+
+pub use exports::*;
