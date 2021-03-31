@@ -24,6 +24,7 @@ viuer = "0.4.0"
 wgpu = "0.7.0"
 winit = "0.24.0"
 winit_input_helper = "0.9.0"
+gym-core = { path = "../gym-core" }
 
 [dev-dependencies]
 dirs = "3.0.1"

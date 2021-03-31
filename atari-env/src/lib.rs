@@ -5,6 +5,8 @@ pub use ale::Ale;
 pub use ale::AleAction as AtariAction;
 pub use ale::AleConfig as EmulatorConfig;
 
+use gym_core::GymEnv;
+
 pub struct AtariEnv {
     ale: Ale,
 }
@@ -60,3 +62,16 @@ impl AtariEnv {
         self.ale.ram(buf);
     }
 }
+
+impl GymEnv<[u8], AtariAction> for AtariEnv {
+    fn state(&self, observation: &mut [u8]) { AtariEnv::state(self, observation); }
+    fn step(&mut self, action: AtariAction) -> i32 { AtariEnv::step(self, action) }
+    fn is_over(&self) -> bool { AtariEnv::is_game_over(self) }
+    fn reset(&mut self) { AtariEnv::reset(self); }
+}
+
+// pub struct AtariRamEnv {
+//     inner: 
+// }
+// pub struct AtariRgbEnv {
+// }

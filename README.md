@@ -1,9 +1,12 @@
 # Gym
 
+A collection of RL envs and interfaces.
+This is pure-Rust and does not internally bind to Python.
+
 Crates          | Role
 ----------------|----------------------------------------------------------------
 `gym`           | main crate including all sub-crates
-`gym-core`      | provides `GymEnv` trait
+`gym-core`      | provides `GymEnv`, `ContinuousEnv`, `DiscreteEnv`, etc
 `atari-env`     | atari specific interface such as `render_rgb24` or `render_ram`
 `openspiel-env` |
 
