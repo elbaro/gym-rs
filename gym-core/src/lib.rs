@@ -7,10 +7,14 @@ use anyhow::Result;
 
 // impl GymEnv<Observation=i8, DiscreteAction> for AtariEnv
 
-
 // GymEnv provides a generic interface to various environments.
 pub trait GymEnv<Action> {
-    fn state(&self) -> ndarray::ArrayView<f32, ndarray::IxDyn>;
+    // a scalar is considered 0-dim (empty Vec)
+    fn state_size(&self) -> Vec<usize>;
+    // a scalar is considered 0-dim (empty Vec)
+    fn action_size(&self) -> Vec<usize>;
+
+    fn state(&self, out: ndarray::ArrayViewMut<f32, ndarray::IxDyn>) -> Result<()>;
     fn step(&mut self, action: Action) -> Result<i32>;
     // whether the episode is over
     fn is_over(&self) -> bool;
