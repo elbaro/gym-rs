@@ -1,3 +1,4 @@
+use anyhow::Result;
 // - GymEnv<ObservationSpace=Observation2D, ActionSpace=DiscreteAction2D>
 // - impl GymEnv<Observation=[u8], Action=AtariAction> for AtariEnv
 // - impl<O,A> GymEnv<Observation=ndarray::Array<O>, Action=ndarray::Array<A>> for DynamicEnv<O,A>
@@ -8,8 +9,8 @@
 
 
 // GymEnv provides a generic interface to various environments.
-pub trait GymEnv<Observation: ?Sized, Action> {
-    fn state(&self, observation: &mut Observation);
+pub trait GymEnv<Action> {
+    fn state(&self) -> ndarray::ArrayView<f32, ndarray::IxDyn>;
     fn step(&mut self, action: Action) -> Result<i32>;
     // whether the episode is over
     fn is_over(&self) -> bool;
@@ -17,15 +18,8 @@ pub trait GymEnv<Observation: ?Sized, Action> {
     fn reset(&mut self);
 }
 
-// example:
-// impl GymEnv<[u8;W*H*3], AtariAction> for AtariEnv
-// impl GymEnv<ArrayView, Array> for AtariEnv
-
-
-/// ContinuousEnv and DiscreteEnv provide a general interface for envs.
-/// i32 observations are converted to f32.
-pub type ContinuousEnv<'a> = Box<dyn GymEnv<ndarray::ArrayViewMut<'a, f32, ndarray::IxDyn>, ndarray::ArrayD<f32>>>;
-pub type DiscreteEnv<'a> = Box<dyn GymEnv<ndarray::ArrayViewMut<'a, f32, ndarray::IxDyn>, ndarray::ArrayD<i32>>>;
+pub type ContinuousEnv = Box<dyn GymEnv<ndarray::ArrayD<f32>>>;
+pub type DiscreteEnv = Box<dyn GymEnv<ndarray::ArrayD<i32>>>;
 
 // Examples:
 // let mut envs: Vec<GeneralEnv> = vec![];
@@ -36,13 +30,13 @@ pub type DiscreteEnv<'a> = Box<dyn GymEnv<ndarray::ArrayViewMut<'a, f32, ndarray
 
 
 struct Gym {
-    continuous_envs: HashMap<String, Fn()->ContinuousEnv>,
-    discrete_envs: HashMap<String, Fn()->DiscreteEnv>,
+    continuous_envs: std::collections::HashMap<String, fn()->ContinuousEnv>,
+    discrete_envs: std::collections::HashMap<String, fn()->DiscreteEnv>,
 }
 
 impl Gym {
     pub fn new() -> Self {
-        let s : Self = Self { continuous_envs: HashMap::new(), discrete_envs: HashMap::new() };
+        let s : Self = Self { continuous_envs: std::collections::HashMap::new(), discrete_envs: std::collections::HashMap::new() };
 
         #[cfg(feature="atari")]
         {

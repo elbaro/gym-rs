@@ -89,8 +89,8 @@ impl DiscreteEnv<u8> for AtariRamEnv {
             inner: env,
         }
     }
-    fn state(&self, observation: &mut ArrayViewMut<_, f32, IxDyn>) {
-        *observation = self.buf2.view_mut();
+    fn state(&self) -> ndarray::ArrayView<_, f32, IxDyn>) {
+        self.buf2.view();
     }
     fn step(&mut self, action: ndarray::ArrayD<f32>) -> Result<i32> { 
         let action = action.into_dimensionality::<Ix0>()?.into_scalar() as AtariAction;
@@ -111,8 +111,8 @@ impl DiscreteEnv<u8> for AtariRgbEnv {
             inner: env,
         }
     }
-    fn state(&self, observation: &mut ArrayViewMut<_, f32, IxDyn>) {
-        *observation = self.buf2.view_mut();
+    fn state(&self) -> ndarray::ArrayView<_, f32, IxDyn>{
+        self.buf2.view()
     }
     fn step(&mut self, action: ndarray::ArrayD<f32>) -> Result<i32> { 
         let action = action.into_dimensionality::<Ix0>()?.into_scalar() as AtariAction;
