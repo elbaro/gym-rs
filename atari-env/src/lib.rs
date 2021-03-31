@@ -7,7 +7,7 @@ pub use ale::AleConfig as EmulatorConfig;
 use gym_core::{GymEnv};
 
 use anyhow::{Context, Result};
-use ndarray::{Array1, Array3, ArrayView, ArrayView3, ArrayD, Ix0, Ix1, Ix3, IxDyn};
+use ndarray::{Array1, ArrayView3, ArrayD, Ix0, Ix1, Ix3};
 use num_traits::cast::FromPrimitive;
 
 pub struct AtariEnv {
@@ -123,7 +123,8 @@ impl GymEnv<ndarray::ArrayD<i32>> for AtariRgbEnv {
     fn action_size(&self) -> Vec<usize> { vec![] }
     fn state(&self, out: ndarray::ArrayViewMut<f32, ndarray::IxDyn>) -> Result<()> {
         let mut out = out.into_dimensionality::<Ix3>()?;
-        ndarray::parallel::par_azip!((a in &mut out, &b in &self.buf1) {*a = b as f32 / 255.0;});
+        let from: ArrayView3<_> = self.buf1.view().into_shape(self.state_size())?.into_dimensionality()?;
+        ndarray::parallel::par_azip!((a in &mut out, &b in &from) {*a = b as f32 / 255.0;});
         // ndarray::parallel::par_azip!((a in &mut out, &b in &self.buf1) {*a = b as f32 / 255.0;});
         Ok(())
     }
@@ -132,9 +133,6 @@ impl GymEnv<ndarray::ArrayD<i32>> for AtariRgbEnv {
         let action = AtariAction::from_i32(action.into_dimensionality::<Ix0>()?.into_scalar()).context("action out of range")?;
         let reward = self.inner.step(action);
         self.inner.render_rgb24(self.buf1.as_slice_mut().unwrap());
-
-        let from: ArrayView3<_> = self.buf1.view().into_shape(self.buf2.shape())?.into_dimensionality()?;
-        ndarray::parallel::par_azip!((a in &mut self.buf2, &b in &from) {*a = b as f32 / 255.0;});
         Ok(reward)
     }
     fn is_over(&self) -> bool { self.inner.is_game_over() }
