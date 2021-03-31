@@ -18,10 +18,8 @@ pub trait GymEnv<Action> {
     fn reset(&mut self);
 }
 
-pub trait ContinuousEnvTrait = GymEnv<ndarray::ArrayD<f32>>;
-pub trait DiscreteEnvTrait = GymEnv<ndarray::ArrayD<i32>>;
-pub type ContinuousEnv = Box<dyn ContinuousEnvTrait>;
-pub type DiscreteEnv = Box<dyn DiscreteEnvTrait>;
+pub type ContinuousEnv = Box<dyn GymEnv<ndarray::ArrayD<f32>>>;
+pub type DiscreteEnv = Box<dyn GymEnv<ndarray::ArrayD<i32>>>;
 
 // Examples:
 // let mut envs: Vec<GeneralEnv> = vec![];

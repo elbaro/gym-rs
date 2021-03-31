@@ -3,7 +3,7 @@ use std::ffi::CString;
 use std::path::Path;
 use std::path::PathBuf;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, num_derive::FromPrimitive)]
 #[repr(i32)]
 pub enum AleAction {
     Noop = 0,
