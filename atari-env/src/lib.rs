@@ -5,7 +5,8 @@ pub use ale::Ale;
 pub use ale::AleAction as AtariAction;
 pub use ale::AleConfig as EmulatorConfig;
 
-use gym_core::GymEnv;
+use gym_core::{GymEnv, DiscreteEnv};
+use ndarray::{Array1, Array3, ArrayView, ArrayD, Ix0, IxDyn};
 
 pub struct AtariEnv {
     ale: Ale,
@@ -81,18 +82,18 @@ pub struct AtariRgbEnv {
     inner: AtariEnv,
 }
 
-impl DiscreteEnv<u8> for AtariRamEnv {
+impl DiscreteEnv for AtariRamEnv {
     fn new(env: AtariEnv) -> Self {
         Self {
-            buf1: Array1::zeros((env.ram_size()),
-            buf2: Array1::zeros((env.ram_size()),
+            buf1: Array1::zeros((env.ram_size(),),),
+            buf2: Array1::zeros((env.ram_size(),),),
             inner: env,
         }
     }
-    fn state(&self) -> ndarray::ArrayView<_, f32, IxDyn>) {
+    fn state(&self) -> ArrayView<_, f32, IxDyn> {
         self.buf2.view();
     }
-    fn step(&mut self, action: ndarray::ArrayD<f32>) -> Result<i32> { 
+    fn step(&mut self, action: ArrayD<f32>) -> Result<i32> { 
         let action = action.into_dimensionality::<Ix0>()?.into_scalar() as AtariAction;
         let reward = self.inner.step(action);
         self.inner.state(self.buf1.as_slice_mut());
@@ -103,18 +104,18 @@ impl DiscreteEnv<u8> for AtariRamEnv {
     fn reset(&mut self) { self.inner.reset(self); }
 }
 
-impl DiscreteEnv<u8> for AtariRgbEnv {
+impl DiscreteEnv for AtariRgbEnv {
     fn new(env: AtariEnv) -> Self {
         Self {
-            buf1: Array1::zeros((env.rgb24_size()),
+            buf1: Array1::zeros(env.rgb24_size()),
             buf2: Array1::zeros((env.height(), env.width(), 3)),
             inner: env,
         }
     }
-    fn state(&self) -> ndarray::ArrayView<_, f32, IxDyn>{
+    fn state(&self) -> ArrayView<_, f32, IxDyn>{
         self.buf2.view()
     }
-    fn step(&mut self, action: ndarray::ArrayD<f32>) -> Result<i32> { 
+    fn step(&mut self, action: ArrayD<f32>) -> Result<i32> { 
         let action = action.into_dimensionality::<Ix0>()?.into_scalar() as AtariAction;
         let reward = self.inner.step(action);
         self.inner.state(self.buf.as_slice_mut());
