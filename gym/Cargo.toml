@@ -12,5 +12,7 @@ atari = ["atari-env"]
 openspiel = ["openspiel-env"]
 
 [dependencies]
+anyhow = "1.0.40"
 atari-env = { path = "../atari-env", optional = true }
 openspiel-env = { path = "../openspiel-env", optional = true }
+gym-core = { path = "../gym-core" }

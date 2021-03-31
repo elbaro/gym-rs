@@ -1,12 +1,13 @@
 mod exports {
     #[cfg(feature = "atari")]
     pub use atari_env as atari;
-
     #[cfg(feature = "openspiel")]
     pub use openspiel_env as openspiel;
 }
-
 pub use exports::*;
+
+#[cfg(feature = "atari")]
+use atari_env::{AtariEnv, AtariRgbEnv, AtariRamEnv};
 
 
 /// Gym is a collection of known envs.
@@ -18,23 +19,40 @@ pub use exports::*;
 ///   gym::continuous_env("atari-pong-v0"),
 /// ];
 
+use anyhow::{Context, Result};
+use gym_core::{DiscreteEnv, ContinuousEnv};
 
 struct Gym {
-    continuous_envs: std::collections::HashMap<String, fn()->ContinuousEnv>,
-    discrete_envs: std::collections::HashMap<String, fn()->DiscreteEnv>,
+    continuous_envs: std::collections::HashMap<String, Box<dyn Fn()->ContinuousEnv>>,
+    discrete_envs: std::collections::HashMap<String, Box<dyn Fn()->DiscreteEnv>>,
 }
 
 impl Gym {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self> {
         let s : Self = Self { continuous_envs: std::collections::HashMap::new(), discrete_envs: std::collections::HashMap::new() };
 
         #[cfg(feature="atari")]
-        {
-            s.continuous_envs.insert("atari-breakout-ram", || AtariRamEnv());
-            s.continuous_envs.insert("atari-breakout-rgb", || AtariRgbEnv());
+        if let Ok(dir) = std::env::var("ATARI_ROMS_DIR") {
+            let dir =  std::path::PathBuf::from(dir);
+            if dir.is_dir() {
+                for entry in dir.read_dir()? {
+                    if let Ok(entry) = entry {
+                        let path = entry.path();
+                        let name: &str = path.file_stem().with_context(|| format!("filename error: {}", entry.path().display()))?.to_str().context("atari rom filename is not utf-8")?;
+                        let name = name.replace("_", "-");
+                        s.discrete_envs.insert(format!("atari-{}-ram", name), Box::new(|| AtariRamEnv::new(AtariEnv::new(path, Default::default()))));
+                        s.discrete_envs.insert(format!("atari-{}-rgb", name), Box::new(|| AtariRgbEnv::new(AtariEnv::new(path, Default::default()))));
+                    }
+                }
+            } else {
+                anyhow::bail!("ATARI_ROMS_DIR({}) is not a directory", dir.display());
+            }
+            
+        } else {
+            anyhow::bail!("Please set ATARI_ROMS_DIR ( e.g. export ATARI_ROMS_DIR=~/.local/lib/python3.9/site-packages/atari_py/atari_roms/ )")
         }
 
-        s
+        Ok(s)
     }
     pub fn continuous_envs(&self) -> Vec<String> {
         self.continuous_envs.keys().cloned().collect()

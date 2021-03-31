@@ -83,7 +83,7 @@ pub struct AtariRgbEnv {
 }
 
 impl AtariRamEnv {
-    fn new(env: AtariEnv) -> Self {
+    pub fn new(env: AtariEnv) -> Self {
         Self {
             buf1: Array1::zeros(env.ram_size()),
             inner: env,
@@ -110,7 +110,7 @@ impl GymEnv<ndarray::ArrayD<i32>> for AtariRamEnv {
 }
 
 impl AtariRgbEnv {
-    fn new(env: AtariEnv) -> Self {
+    pub fn new(env: AtariEnv) -> Self {
         Self {
             buf1: Array1::zeros(env.rgb24_size()),
             inner: env,
