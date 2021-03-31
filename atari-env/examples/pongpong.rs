@@ -53,21 +53,7 @@ fn create_window(
     )
 }
 
-fn main() {
-    let mut env = AtariEnv::new(
-        dirs::home_dir().unwrap().join(".local/lib/python3.9/site-packages/atari_py/atari_roms/space_invaders.bin"),
-        EmulatorConfig {
-            // display_screen: true,
-            // sound: true,
-            frame_skip: 1,
-            color_averaging: false,
-            ..EmulatorConfig::default()
-        },
-    );
-
-    let event_loop = EventLoop::new();
-    let (window, p_width, p_height, mut _hidpi_factor) =
-        create_window("asdf", env.width() as f64, env.height() as f64, &event_loop);
+fn run(mut env: AtariEnv, window: winit::window::Window, p_width: u32, p_height: u32) {    
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
     let mut pixels = pixels::Pixels::new(env.width() as u32, env.height() as u32, surface_texture).unwrap();
 
@@ -88,4 +74,42 @@ fn main() {
         }
         env.reset();
     }
+}
+
+fn main() {
+    let event_loop = EventLoop::new();
+
+    let env1 = AtariEnv::new(
+        dirs::home_dir().unwrap().join(".local/lib/python3.9/site-packages/atari_py/atari_roms/space_invaders.bin"),
+        EmulatorConfig {
+            // display_screen: true,
+            // sound: true,
+            frame_skip: 1,
+            color_averaging: false,
+            ..EmulatorConfig::default()
+        },
+    );
+    let (window, p_width, p_height, mut _hidpi_factor) =
+        create_window("pong1", env1.width() as f64, env1.height() as f64, &event_loop);
+    let t1 = std::thread::spawn(move || {
+        run(env1, window, p_width, p_height);
+    });
+
+    let env2 = AtariEnv::new(
+        dirs::home_dir().unwrap().join(".local/lib/python3.9/site-packages/atari_py/atari_roms/space_invaders.bin"),
+        EmulatorConfig {
+            // display_screen: true,
+            // sound: true,
+            frame_skip: 1,
+            color_averaging: false,
+            ..EmulatorConfig::default()
+        },
+    );
+    let (window, p_width, p_height, mut _hidpi_factor) =
+        create_window("pong2", env2.width() as f64, env2.height() as f64, &event_loop);
+    let t2 = std::thread::spawn(move || {
+        run(env2, window, p_width, p_height);
+    });
+    t1.join().unwrap();
+    t2.join().unwrap();
 }

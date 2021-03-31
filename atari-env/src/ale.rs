@@ -60,6 +60,9 @@ pub struct Ale {
     inner: *mut atari_env_sys::ALEInterface,
 }
 
+// TODO: it seems to work, but needs to be verified
+unsafe impl Send for Ale {}
+
 impl Drop for Ale {
     fn drop(&mut self) {
         unsafe {
