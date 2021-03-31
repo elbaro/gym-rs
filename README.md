@@ -1,7 +1,10 @@
 # Gym
 
 A collection of RL envs and interfaces.
-This is pure-Rust and does not internally bind to Python.
+This does not internally bind to Python, which means you can run faster and parallel computations.
+
+Example of running envs in separate threads:
+![](pongpong.png)
 
 Crates          | Role
 ----------------|----------------------------------------------------------------
@@ -13,7 +16,8 @@ Crates          | Role
 ## Example
 ```
 cargo run --example pong
-cargo run --example ppo
+cargo run --example pongpong
+cargo run --example ppo (WIP)
 ```
 
 ## Feature gates
