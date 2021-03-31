@@ -34,3 +34,4 @@ anyhow = "1.0.40"
 dirs = "3.0.1"
 rand = "0.8.3"
 tch = "0.4.0"
+gym = { path = "../gym" }

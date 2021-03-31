@@ -29,7 +29,7 @@ struct Gym {
 
 impl Gym {
     pub fn new() -> Result<Self> {
-        let s : Self = Self { continuous_envs: std::collections::HashMap::new(), discrete_envs: std::collections::HashMap::new() };
+        let mut s : Self = Self { continuous_envs: std::collections::HashMap::new(), discrete_envs: std::collections::HashMap::new() };
 
         #[cfg(feature="atari")]
         if let Ok(dir) = std::env::var("ATARI_ROMS_DIR") {
@@ -40,8 +40,14 @@ impl Gym {
                         let path = entry.path();
                         let name: &str = path.file_stem().with_context(|| format!("filename error: {}", entry.path().display()))?.to_str().context("atari rom filename is not utf-8")?;
                         let name = name.replace("_", "-");
-                        s.discrete_envs.insert(format!("atari-{}-ram", name), Box::new(|| AtariRamEnv::new(AtariEnv::new(path, Default::default()))));
-                        s.discrete_envs.insert(format!("atari-{}-rgb", name), Box::new(|| AtariRgbEnv::new(AtariEnv::new(path, Default::default()))));
+                        {
+                            let path = path.clone();
+                            s.discrete_envs.insert(format!("atari-{}-ram", name), Box::new(move || Box::new(AtariRamEnv::new(AtariEnv::new(path.clone(), Default::default())))));
+                        }
+                        {
+                            let path = path.clone();
+                            s.discrete_envs.insert(format!("atari-{}-rgb", name), Box::new(move || Box::new(AtariRgbEnv::new(AtariEnv::new(path.clone(), Default::default())))));
+                        }
                     }
                 }
             } else {
