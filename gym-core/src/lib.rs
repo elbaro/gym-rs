@@ -33,7 +33,34 @@ pub type DiscreteEnv<'a> = Box<dyn GymEnv<ndarray::ArrayViewMut<'a, f32, ndarray
 // envs.push(AtariEnv::new("tetris-v1.out").as_general_env());
 // envs.push(CartPole::new().as_general_env(ActionType::Continuous));
 // // same experiment code for all envs
-// train(envs[0]);
-// train(envs[1]);
-// train(envs[2]);
 
+
+struct Gym {
+    continuous_envs: HashMap<String, Fn()->ContinuousEnv>,
+    discrete_envs: HashMap<String, Fn()->DiscreteEnv>,
+}
+
+impl Gym {
+    pub fn new() -> Self {
+        let s : Self = Self { continuous_envs: HashMap::new(), discrete_envs: HashMap::new() };
+
+        #[cfg(feature="atari")]
+        {
+            s.continuous_envs.insert("atari-breakout-ram", || AtariRamEnv());
+            s.continuous_envs.insert("atari-breakout-rgb", || AtariRgbEnv());
+        }
+    }
+    pub fn continuous_envs(&self) -> Vec<String> {
+        self.continuous_envs.keys().cloned().collect()
+    }
+    pub fn discrete_envs(&self) -> Vec<String> {
+        self.discrete_envs.keys().cloned().collect()
+    }
+
+    pub fn continuous_env(&self, name: &str) -> Option<ContinuousEnv> {
+        self.continuous_envs.get(name).map(|f| f())
+    }
+    pub fn discrete_env(&self, name:&str) -> Option<DiscreteEnv> {
+        self.discrete_envs.get(name).map(|f| f())
+    }
+}

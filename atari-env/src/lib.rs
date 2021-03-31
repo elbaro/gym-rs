@@ -61,31 +61,65 @@ impl AtariEnv {
     pub fn render_ram(&self, buf: &mut [u8]) {
         self.ale.ram(buf);
     }
+    pub fn into_ram_env(self) -> AtariRamEnv {
+        AtariRamEnv::new(self)
+    }
+    pub fn into_rgb_env(self) -> AtariRgbEnv {
+        AtariRgbEnv::new(self)
+    }
 }
 
 pub struct AtariRamEnv {
+    buf1: Array1<u8>,
+    buf2: Array1<f32>,
     inner: AtariEnv,
 }
 
 pub struct AtariRgbEnv {
+    buf1: Array1<u8>,
+    buf2: Array3<f32>,
     inner: AtariEnv,
 }
 
 impl DiscreteEnv<u8> for AtariRamEnv {
-    fn state(&self, observation: &mut [u8]) { self.inner.state(self, observation); }
+    fn new(env: AtariEnv) -> Self {
+        Self {
+            buf1: Array1::zeros((env.ram_size()),
+            buf2: Array1::zeros((env.ram_size()),
+            inner: env,
+        }
+    }
+    fn state(&self, observation: &mut ArrayViewMut<_, f32, IxDyn>) {
+        *observation = self.buf2.view_mut();
+    }
     fn step(&mut self, action: ndarray::ArrayD<f32>) -> Result<i32> { 
         let action = action.into_dimensionality::<Ix0>()?.into_scalar() as AtariAction;
-        self.inner.step(action)
+        let reward = self.inner.step(action);
+        self.inner.state(self.buf1.as_slice_mut());
+        ndarray::parallel::par_azip!((a in &mut self.buf2, &b in &self.buf1) {*a = b as f32 / 255.0;});
+        Ok(reward)
     }
     fn is_over(&self) -> bool { self.inner.is_game_over(self) }
     fn reset(&mut self) { self.inner.reset(self); }
 }
 
 impl DiscreteEnv<u8> for AtariRgbEnv {
-    fn state(&self, observation: &mut [u8]) { self.inner.state(self, observation); }
+    fn new(env: AtariEnv) -> Self {
+        Self {
+            buf1: Array1::zeros((env.rgb24_size()),
+            buf2: Array1::zeros((env.height(), env.width(), 3)),
+            inner: env,
+        }
+    }
+    fn state(&self, observation: &mut ArrayViewMut<_, f32, IxDyn>) {
+        *observation = self.buf2.view_mut();
+    }
     fn step(&mut self, action: ndarray::ArrayD<f32>) -> Result<i32> { 
         let action = action.into_dimensionality::<Ix0>()?.into_scalar() as AtariAction;
-        self.inner.step(action)
+        let reward = self.inner.step(action);
+        self.inner.state(self.buf.as_slice_mut());
+        ndarray::parallel::par_azip!((a in &mut self.buf2, &b in &self.buf1) {*a = b as f32 / 255.0;});
+        Ok(reward)
     }
     fn is_over(&self) -> bool { self.inner.is_game_over(self) }
     fn reset(&mut self) { self.inner.reset(self); }
