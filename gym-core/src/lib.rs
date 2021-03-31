@@ -10,7 +10,7 @@
 // GymEnv provides a generic interface to various environments.
 pub trait GymEnv<Observation: ?Sized, Action> {
     fn state(&self, observation: &mut Observation);
-    fn step(&mut self, action: Action) -> i32;
+    fn step(&mut self, action: Action) -> Result<i32>;
     // whether the episode is over
     fn is_over(&self) -> bool;
     // resets the episode

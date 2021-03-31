@@ -63,15 +63,30 @@ impl AtariEnv {
     }
 }
 
-impl GymEnv<[u8], AtariAction> for AtariEnv {
-    fn state(&self, observation: &mut [u8]) { AtariEnv::state(self, observation); }
-    fn step(&mut self, action: AtariAction) -> i32 { AtariEnv::step(self, action) }
-    fn is_over(&self) -> bool { AtariEnv::is_game_over(self) }
-    fn reset(&mut self) { AtariEnv::reset(self); }
+pub struct AtariRamEnv {
+    inner: AtariEnv,
 }
 
-// pub struct AtariRamEnv {
-//     inner: 
-// }
-// pub struct AtariRgbEnv {
-// }
+pub struct AtariRgbEnv {
+    inner: AtariEnv,
+}
+
+impl DiscreteEnv<u8> for AtariRamEnv {
+    fn state(&self, observation: &mut [u8]) { self.inner.state(self, observation); }
+    fn step(&mut self, action: ndarray::ArrayD<f32>) -> Result<i32> { 
+        let action = action.into_dimensionality::<Ix0>()?.into_scalar() as AtariAction;
+        self.inner.step(action)
+    }
+    fn is_over(&self) -> bool { self.inner.is_game_over(self) }
+    fn reset(&mut self) { self.inner.reset(self); }
+}
+
+impl DiscreteEnv<u8> for AtariRgbEnv {
+    fn state(&self, observation: &mut [u8]) { self.inner.state(self, observation); }
+    fn step(&mut self, action: ndarray::ArrayD<f32>) -> Result<i32> { 
+        let action = action.into_dimensionality::<Ix0>()?.into_scalar() as AtariAction;
+        self.inner.step(action)
+    }
+    fn is_over(&self) -> bool { self.inner.is_game_over(self) }
+    fn reset(&mut self) { self.inner.reset(self); }
+}
