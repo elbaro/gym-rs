@@ -1,2 +1,2 @@
 [workspace]
-members = ["gym", "openspiel-sys", "atari-env", "atari-env-sys"]
+members = ["gyms", "openspiel-sys", "atari-env", "atari-env-sys"]

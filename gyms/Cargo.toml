@@ -1,5 +1,5 @@
 [package]
-name = "gym"
+name = "gyms"
 version = "0.1.0"
 authors = ["elbaro <elbaro@users.noreply.github.com>"]
 edition = "2018"

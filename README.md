@@ -1,4 +1,4 @@
-# Gym
+# Gym-rs
 
 A collection of RL envs and interfaces.
 - Does not bind to Python like other RL crates. You can run faster and parallel computations.
@@ -9,10 +9,12 @@ Example of running envs in separate threads without vectorized envs:
 
 Crates          | Role
 ----------------|----------------------------------------------------------------
-`gym`           | main crate including all sub-crates
+`gyms`          | main crate including all sub-crates
 `gym-core`      | provides `GymEnv`, `ContinuousEnv`, `DiscreteEnv`, etc
 `atari-env`     | atari specific interface such as `render_rgb24` or `render_ram`
 `openspiel-env` |
+
+Unrelated crates: `gym`, `gym-rs`
 
 ## Example
 ```
