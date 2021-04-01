@@ -3,19 +3,22 @@ name = "gym"
 version = "0.1.0"
 authors = ["elbaro <elbaro@users.noreply.github.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Gym for Reinforcement Learning"
+repository = "https://github.com/elbaro/gym-rs"
+license = "MIT"
+keywords = ["learning", "rl", "ml", "gym"]
+categories = ["science", "simulation", "emulators"]
 
 [features]
 default = ["atari"]
 atari = ["atari-env"]
-openspiel = ["openspiel-env"]
+# openspiel = ["openspiel-env"]
 
 [dependencies]
 anyhow = "1.0.40"
-atari-env = { path = "../atari-env", optional = true }
-openspiel-env = { path = "../openspiel-env", optional = true }
-gym-core = { path = "../gym-core" }
+atari-env = { version = "0.1.1", path = "../atari-env", optional = true }
+# openspiel-env = { version = "0.1.0", path = "../openspiel-env", optional = true }
+gym-core = { version = "0.1.0", path = "../gym-core" }
 
 [dev-dependencies]
 ndarray = "0.15.1"
