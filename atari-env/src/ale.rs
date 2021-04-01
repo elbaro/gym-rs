@@ -40,6 +40,8 @@ pub struct AleConfig {
     pub frame_skip: i32, // 1 is no skip
     pub repeat_action_probability: f32,
     pub record_screen_dir: Option<PathBuf>,
+    ///
+    pub difficulty_setting: i32,
 }
 
 impl Default for AleConfig {
@@ -52,6 +54,7 @@ impl Default for AleConfig {
             frame_skip: 1,
             repeat_action_probability: 0.25,
             record_screen_dir: None,
+            difficulty_setting: 0,
         }
     }
 }
@@ -100,6 +103,10 @@ impl Ale {
             }
             let rom_path = CString::new(rom_path.to_str().unwrap()).unwrap();
             atari_env_sys::loadROM(ale, rom_path.as_ptr());
+        }
+        unsafe {
+            atari_env_sys::setDifficulty(ale, config.difficulty_setting);
+            atari_env_sys::reset_game(ale);
         }
 
         Self { inner: ale }
@@ -150,6 +157,15 @@ impl Ale {
 
     pub fn lives(&self) -> u32 {
         unsafe { atari_env_sys::lives(self.inner) as u32 }
+    }
+
+    pub fn available_difficulty_settings(&self) -> Vec<i32> {
+        let n = unsafe { atari_env_sys::getAvailableDifficultiesSize(self.inner) } as usize;
+        let mut buf = vec![0i32; n];
+        unsafe {
+            atari_env_sys::getAvailableDifficulties(self.inner, buf.as_mut_ptr() as *mut i32);
+        }
+        buf
     }
 
     pub fn width(&self) -> u32 {

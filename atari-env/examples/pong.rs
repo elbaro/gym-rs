@@ -55,7 +55,9 @@ fn create_window(
 
 fn main() {
     let mut env = AtariEnv::new(
-        dirs::home_dir().unwrap().join(".local/lib/python3.9/site-packages/atari_py/atari_roms/space_invaders.bin"),
+        dirs::home_dir()
+            .unwrap()
+            .join(".local/lib/python3.9/site-packages/atari_py/atari_roms/space_invaders.bin"),
         EmulatorConfig {
             // display_screen: true,
             // sound: true,
@@ -69,10 +71,15 @@ fn main() {
     let (window, p_width, p_height, mut _hidpi_factor) =
         create_window("asdf", env.width() as f64, env.height() as f64, &event_loop);
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
-    let mut pixels = pixels::Pixels::new(env.width() as u32, env.height() as u32, surface_texture).unwrap();
+    let mut pixels =
+        pixels::Pixels::new(env.width() as u32, env.height() as u32, surface_texture).unwrap();
 
     let actions = env.minimal_actions();
     println!("action set: {:?}", actions);
+    println!(
+        "difficulty settings: {:?}",
+        env.available_difficulty_settings()
+    );
 
     loop {
         while !env.is_game_over() {

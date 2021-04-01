@@ -34,17 +34,18 @@ impl AtariEnv {
     pub fn minimal_actions(&self) -> Vec<AtariAction> {
         self.ale.minimal_actions()
     }
+    pub fn available_difficulty_settings(&self) -> Vec<i32> {
+        self.ale.available_difficulty_settings()
+    }
     pub fn is_game_over(&self) -> bool {
         self.ale.is_game_over()
     }
-
     pub fn reset(&mut self) {
         self.ale.reset()
     }
     pub fn step(&mut self, action: AtariAction) -> i32 {
         self.ale.take_action(action)
     }
-
     pub fn rgb32_size(&self) -> usize {
         self.ale.rgb32_size()
     }
