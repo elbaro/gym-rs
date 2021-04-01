@@ -1,9 +1,10 @@
 # Gym
 
 A collection of RL envs and interfaces.
-This does not internally bind to Python, which means you can run faster and parallel computations.
+- Does not bind to Python like other RL crates. You can run faster and parallel computations.
+- Provides an unified interface to various envs. Verify your algorithm on classic envs and apply to your domain without code change.
 
-Example of running envs in separate threads:
+Example of running envs in separate threads without vectorized envs:
 ![](pongpong.png)
 
 Crates          | Role
@@ -17,6 +18,7 @@ Crates          | Role
 ```
 cargo run --example pong
 cargo run --example pongpong
+cargo run --example gym (requires the environmental variable `ATARI_ROMS_DIR`)
 cargo run --example ppo (WIP)
 ```
 

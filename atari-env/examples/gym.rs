@@ -1,8 +1,5 @@
 use anyhow::Result;
-use atari_env::{AtariAction, AtariEnv, EmulatorConfig};
 use pixels::SurfaceTexture;
-use rand::seq::SliceRandom;
-use rand::Rng;
 use winit::dpi::{LogicalPosition, LogicalSize, PhysicalSize};
 use winit::event_loop::EventLoop;
 
@@ -79,11 +76,17 @@ fn main() -> Result<()> {
             let action = action_space.sample(&mut rand::thread_rng());
             env.step(action)?;
             let state = fbuf.view_mut().into_dyn();
-            env.state(state)?;
+            env.state(state)?; // rgb24
 
-            let dst = pixels.get_frame();
-            for (a, b) in fbuf.iter().zip(dst.iter_mut()) {
-                *b = (*a * 255.0) as u8;
+            let dst = pixels.get_frame(); // rgb32
+
+            let mut i = 0;
+            for x in fbuf.iter() {
+                if i % 4 == 3 {
+                    i += 1;
+                }
+                dst[i] = (*x * 255.0) as u8;
+                i += 1;
             }
 
             pixels.render().unwrap();
