@@ -56,18 +56,18 @@ fn create_window(
 
 fn main() -> Result<()> {
     let gym = gym::Gym::new()?;
-    let env = gym.continuous_env("atari-space-invaders-rgb").unwrap();
+    let mut env = gym.discrete_env("atari-space-invaders-rgb").unwrap();
 
     let event_loop = EventLoop::new();
     let dims = env.state_size();
-    let (h,w) = (dims[0], dims[1]);
+    let (h, w) = (dims[0], dims[1]);
     let (window, p_width, p_height, mut _hidpi_factor) =
         create_window("asdf", w as f64, h as f64, &event_loop);
     let surface_texture = SurfaceTexture::new(p_width, p_height, &window);
     let mut pixels = pixels::Pixels::new(w as u32, h as u32, surface_texture).unwrap();
 
-
-    let mut fbuf = ndarray::Array3::zeros((h,w,3));
+    let mut fbuf = ndarray::Array3::zeros((h, w, 3));
+    let action_space = env.action_space();
 
     loop {
         while !env.is_over() {
@@ -76,12 +76,16 @@ fn main() -> Result<()> {
             // } else {
             //     AtariAction::Noop
             // };
-            env.step(ndarray::arr0!(2));
-            let out = ndarray::ArrayViewMut::<f32, ndarray::IxDyn>::from_shape(env.state_size(), fbuf.into_dyn())?;
+            let action = action_space.sample(&mut rand::thread_rng());
+            env.step(action)?;
+            let state = fbuf.view_mut().into_dyn();
+            env.state(state)?;
 
-            pixels.get_frame()
+            let dst = pixels.get_frame();
+            for (a, b) in fbuf.iter().zip(dst.iter_mut()) {
+                *b = (*a * 255.0) as u8;
+            }
 
-            env.state(out);
             pixels.render().unwrap();
             window.request_redraw();
         }

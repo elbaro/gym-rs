@@ -154,6 +154,12 @@ impl GymEnv<i32> for AtariRgbEnv {
             [(action.into_dimensionality::<Ix0>()?.into_scalar() - 1) as usize];
         let reward = self.inner.step(action);
         self.inner.render_rgb24(self.buf1.as_slice_mut().unwrap());
+
+        let mut sum = 0_u32;
+        for x in self.buf1.iter() {
+            sum += *x as u32;
+        }
+        println!("sum {}", sum);
         Ok(reward)
     }
     fn is_over(&self) -> bool {
