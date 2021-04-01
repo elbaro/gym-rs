@@ -16,3 +16,9 @@ anyhow = "1.0.40"
 atari-env = { path = "../atari-env", optional = true }
 openspiel-env = { path = "../openspiel-env", optional = true }
 gym-core = { path = "../gym-core" }
+
+[dev-dependencies]
+ndarray = "0.15.1"
+pixels = "0.2.0"
+rand = "0.8.3"
+winit = "0.24.0"

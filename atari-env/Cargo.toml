@@ -1,6 +1,6 @@
 [package]
 name = "atari-env"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["elbaro <elbaro@users.noreply.github.com>"]
 edition = "2018"
 description = "Atari Environment for Reinforcement Learning"
@@ -15,6 +15,7 @@ sdl = ["atari-env-sys/sdl"]
 
 [dependencies]
 atari-env-sys = { version = "0.1.0", path = "../atari-env-sys" }
+gym-core = { version = "0.1.0", path = "../gym-core" }
 c_str_macro = "1.0.2"
 image = "0.23.14"
 minifb = "0.19.2"
@@ -24,7 +25,6 @@ viuer = "0.4.0"
 wgpu = "0.7.0"
 winit = "0.24.0"
 winit_input_helper = "0.9.0"
-gym-core = { path = "../gym-core" }
 ndarray = { version = "0.15.1", features = ["rayon"] }
 num-traits = "0.2.14"
 num-derive = "0.3.3"
@@ -34,4 +34,3 @@ anyhow = "1.0.40"
 dirs = "3.0.1"
 rand = "0.8.3"
 tch = "0.4.0"
-gym = { path = "../gym" }
