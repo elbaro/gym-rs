@@ -29,10 +29,3 @@ pub trait GymEnv<ActionDtype> {
 
 pub type ContinuousEnv = Box<dyn GymEnv<f32>>;
 pub type DiscreteEnv = Box<dyn GymEnv<i32>>;
-
-// Examples:
-// let mut envs: Vec<GeneralEnv> = vec![];
-// envs.push(AtariEnv::new("breakout-v1.out").as_general_env(ObservationType::Rgb24));
-// envs.push(AtariEnv::new("tetris-v1.out").as_general_env());
-// envs.push(CartPole::new().as_general_env(ActionType::Continuous));
-// // same experiment code for all envs
