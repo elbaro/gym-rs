@@ -3,6 +3,11 @@ name = "gym-core"
 version = "0.1.0"
 authors = ["elbaro <elbaro@users.noreply.github.com>"]
 edition = "2018"
+description = "Gym Interface for Reinforcement Learning"
+repository = "https://github.com/elbaro/gym-rs"
+license = "MIT"
+keywords = ["learning", "rl", "ml", "gym"]
+categories = ["science", "simulation"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
