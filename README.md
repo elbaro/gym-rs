@@ -34,7 +34,7 @@ Crates          | Default | Available
 `atari-env-sys` |         |
 `openspiel-env` |         |
 
-Example: `gym = {version = "*", features = ["atari", "openspiel", "atari_env/sdl"]} `
+Example: `gyms = {version = "*", features = ["atari", "openspiel", "atari_env/sdl"]} `
 
 ## ROMs
 The easiest way to obtain ALE-compatible ROMs is `pip install atari-py`.
