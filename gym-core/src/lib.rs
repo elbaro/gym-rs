@@ -1,29 +1,35 @@
 use anyhow::Result;
-// - GymEnv<ObservationSpace=Observation2D, ActionSpace=DiscreteAction2D>
-// - impl GymEnv<Observation=[u8], Action=AtariAction> for AtariEnv
-// - impl<O,A> GymEnv<Observation=ndarray::Array<O>, Action=ndarray::Array<A>> for DynamicEnv<O,A>
-
-// GymEnv<ObservationSpace>=
-
-// impl GymEnv<Observation=i8, DiscreteAction> for AtariEnv
+mod action_space;
+pub use action_space::{
+    ActionSpace, CategoricalAction, ContinuousAction, MultiCategoricalAction, MultiContinuousAction,
+};
 
 // GymEnv provides a generic interface to various environments.
-pub trait GymEnv<Action> {
+pub trait GymEnv<ActionDtype> {
     // a scalar is considered 0-dim (empty Vec)
     fn state_size(&self) -> Vec<usize>;
     // a scalar is considered 0-dim (empty Vec)
     fn action_size(&self) -> Vec<usize>;
 
+    /// it's hard to cover all types of action_space:
+    /// discrete/continuous, box, hierarchical, etc
+    /// Supported action types:
+    /// - Single Discrete Integer (n)
+    /// - N-dim discrete integers (n, num_action for each dim)
+    /// - Single Continuous (low, high)
+    /// - N-dim continuous (shape, n-dim low, n-dim high)
+    fn action_space(&self) -> ActionSpace<ActionDtype>;
+
     fn state(&self, out: ndarray::ArrayViewMut<f32, ndarray::IxDyn>) -> Result<()>;
-    fn step(&mut self, action: Action) -> Result<i32>;
+    fn step(&mut self, action: ndarray::ArrayD<ActionDtype>) -> Result<i32>;
     // whether the episode is over
     fn is_over(&self) -> bool;
     // resets the episode
     fn reset(&mut self);
 }
 
-pub type ContinuousEnv = Box<dyn GymEnv<ndarray::ArrayD<f32>>>;
-pub type DiscreteEnv = Box<dyn GymEnv<ndarray::ArrayD<i32>>>;
+pub type ContinuousEnv = Box<dyn GymEnv<f32>>;
+pub type DiscreteEnv = Box<dyn GymEnv<i32>>>;
 
 // Examples:
 // let mut envs: Vec<GeneralEnv> = vec![];
