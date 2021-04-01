@@ -89,6 +89,7 @@ impl AtariRamEnv {
         Self {
             buf1: Array1::zeros(env.ram_size()),
             inner: env,
+            available_actions: env.minimal_actions(),
         }
     }
 }
@@ -122,7 +123,7 @@ impl GymEnv<ndarray::ArrayD<i32>> for AtariRamEnv {
 
 impl AtariRgbEnv {
     pub fn new(env: AtariEnv) -> Self {
-        let s = Self {
+        Self {
             buf1: Array1::zeros(env.rgb24_size()),
             inner: env,
             available_actions: env.minimal_actions(),
