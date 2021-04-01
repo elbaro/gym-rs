@@ -1,15 +1,14 @@
 use anyhow::Result;
 mod action_space;
 pub use action_space::{
-    ActionSpace, CategoricalAction, ContinuousAction, MultiCategoricalAction, MultiContinuousAction,
+    ActionSpace, CategoricalActionSpace, ContinuousActionSpace, MultiCategoricalActionSpace,
+    MultiContinuousActionSpace,
 };
 
 // GymEnv provides a generic interface to various environments.
 pub trait GymEnv<ActionDtype> {
     // a scalar is considered 0-dim (empty Vec)
     fn state_size(&self) -> Vec<usize>;
-    // a scalar is considered 0-dim (empty Vec)
-    fn action_size(&self) -> Vec<usize>;
 
     /// it's hard to cover all types of action_space:
     /// discrete/continuous, box, hierarchical, etc
@@ -29,7 +28,7 @@ pub trait GymEnv<ActionDtype> {
 }
 
 pub type ContinuousEnv = Box<dyn GymEnv<f32>>;
-pub type DiscreteEnv = Box<dyn GymEnv<i32>>>;
+pub type DiscreteEnv = Box<dyn GymEnv<i32>>;
 
 // Examples:
 // let mut envs: Vec<GeneralEnv> = vec![];
