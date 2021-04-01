@@ -52,7 +52,7 @@ fn create_window(
 }
 
 fn main() -> Result<()> {
-    let gym = gym::Gym::new()?;
+    let gym = gyms::Gym::new()?;
     let mut env = gym.discrete_env("atari-space-invaders-rgb").unwrap();
 
     let event_loop = EventLoop::new();
