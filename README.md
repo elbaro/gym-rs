@@ -28,7 +28,7 @@ cargo run --example ppo (WIP)
 
 Crates          | Default | Available
 ----------------|---------|------------
-`gym`           | `atari` | `openspiel`
+`gyms`          | `atari` | `openspiel`
 `gym-core`      |         |
 `atari-env`     |         | `sdl`
 `atari-env-sys` |         |
@@ -43,7 +43,7 @@ You will have ROM files in `~/.local/lib/python3.x/site-packages/atari_py/atari_
 ## License
 Crates          | License
 ----------------|--------
-`gym`           | MIT
+`gyms`          | MIT
 `gym-core`      | MIT
 `atari-env`     | GPL v2
 `atari-env-sys` | GPL v2
