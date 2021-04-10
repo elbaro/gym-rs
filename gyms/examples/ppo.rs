@@ -20,7 +20,8 @@ fn new_network(p: &nn::Path, n_actions: usize) -> Box<dyn Fn(&Tensor) -> (Tensor
         .add_fn(|xs| xs.relu())
         .add(nn::conv2d(p / "c4", 64, 64, 4, stride(2)))
         .add_fn(|xs| xs.relu().flat_view())
-        .add(nn::linear(p / "l1", 960, 512, Default::default()))
+        // .add(nn::linear(p / "l1", 960, 512, Default::default()))
+        .add(nn::linear(p / "l1", 768, 512, Default::default()))
         .add_fn(|xs| xs.relu());
     let critic = nn::linear(p / "cl", 512, 1, Default::default());
     let actor = nn::seq()
@@ -89,6 +90,9 @@ impl TrainSet {
         self.are_over.zero_();
     }
     fn push(&mut self, sample: TrainSample) {
+        if self.len == self.nsteps {
+            panic!("TrainSet overflow");
+        }
         let device = self.states.device();
         self.states.get(self.len as i64).copy_(&sample.state);
         self.actions
@@ -153,7 +157,8 @@ fn main() {
     color_backtrace::install();
 
     let mut env = AtariEnv::new(
-        "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/carnival.bin",
+        "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/breakout.bin",
+        // "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/carnival.bin",
         EmulatorConfig {
             display_screen: true,
             ..EmulatorConfig::default()
@@ -178,25 +183,27 @@ fn main() {
     let height = env.height();
     let width = env.width();
 
+    println!("h {} w {}", height, width);
+
     let episode_progress = ProgressBar::new(100);
+    let mut score = 0;
+    let mut lives = env.lives();
     // episode_progress.set_message("Episode");
     for _episode in 0..100 {
         episode_progress.inc(1);
         // PPO is on-policy.
-    
-        let mut score = 0;
         data.reset();
 
         let step_progress = ProgressBar::new(episode_max_step as u64);
         for _step in 0..episode_max_step {
             step_progress.inc(1);
             env.render_rgb24(&mut buf);
-            let state: Tensor = Tensor::from(buf.as_slice()).to_kind(tch::Kind::Float) / 255.0;
+            let state: Tensor = Tensor::from(buf.as_slice()).to_kind(tch::Kind::Float).set_requires_grad(false) / 255.0;
             let state = state
                 .reshape(&[1, (height * width) as i64, 3_i64])
                 .transpose(1, 2)
                 .reshape(&[1, 3, height as i64, width as i64]);
-            let (values, probs) = net(&state); // [BATCH, 1], [BATCH, N_ACTION]
+            let (values, probs) = tch::no_grad(|| net(&state)); // [BATCH, 1], [BATCH, N_ACTION]
             let action = probs.get(0).multinomial(1, true).squeeze1(0).int64_value(&[]) as i32;
             let action: AtariAction = AtariAction::from_i32(action).unwrap();
             let reward = env.step(action);
@@ -211,8 +218,9 @@ fn main() {
             });
 
             // other rows are filled with 0
-            if env.is_game_over() {
-                println!("score {}\n\n", score);
+            if env.is_game_over()  || env.lives() != lives {
+                println!("\nscore {}\n\n", score);
+                lives = env.lives();
                 score = 0;
                 env.reset();
             }

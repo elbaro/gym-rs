@@ -37,6 +37,9 @@ impl AtariEnv {
     pub fn available_difficulty_settings(&self) -> Vec<i32> {
         self.ale.available_difficulty_settings()
     }
+    pub fn lives(&self) -> usize {
+        self.ale.lives() as usize
+    }
     pub fn is_game_over(&self) -> bool {
         self.ale.is_game_over()
     }
