@@ -4,6 +4,13 @@ use indicatif::ProgressBar;
 use tch::nn;
 use tch::nn::OptimizerConfig;
 use tch::Tensor;
+use clap::Clap;
+
+#[derive(Clap)]
+struct Opts {
+    #[clap(default_value="/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/zaxxon.bin")]
+    rom: std::path::PathBuf,
+}
 
 // architecture borrowed from https://github.com/LaurentMazare/tch-rs/blob/master/examples/reinforcement-learning/ppo.rs
 fn new_network(p: &nn::Path, n_actions: usize) -> Box<dyn Fn(&Tensor) -> (Tensor, Tensor)> {
@@ -155,9 +162,10 @@ impl TrainSet {
 
 fn main() {
     color_backtrace::install();
+    let opts = Opts::parse();
 
     let mut env = AtariEnv::new(
-        "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/breakout.bin",
+        opts.rom,
         // "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/carnival.bin",
         EmulatorConfig {
             display_screen: true,
@@ -189,7 +197,7 @@ fn main() {
     let mut score = 0;
     let mut lives = env.lives();
     // episode_progress.set_message("Episode");
-    for _episode in 0..100 {
+    for _episode in 0..10000 {
         episode_progress.inc(1);
         // PPO is on-policy.
         data.reset();
