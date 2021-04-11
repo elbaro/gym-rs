@@ -5,6 +5,7 @@ mod exports {
     // pub use openspiel_env as openspiel;
 }
 pub use exports::*;
+pub mod easy_env;
 
 #[cfg(feature = "atari")]
 use atari_env::{AtariEnv, AtariRamEnv, AtariRgbEnv};
