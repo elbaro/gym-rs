@@ -1,25 +1,36 @@
+//! architecture borrowed from https://github.com/LaurentMazare/tch-rs/blob/master/examples/reinforcement-learning/ppo.rs
+
+use colored::Colorize;
+use inline_python::{python, Context};
 use tch::nn;
 use tch::nn::OptimizerConfig;
 use tch::Tensor;
-use colored::Colorize;
-use inline_python::{Context, python};
 
-// architecture borrowed from https://github.com/LaurentMazare/tch-rs/blob/master/examples/reinforcement-learning/ppo.rs
-fn new_network(p: &nn::Path, n: usize, n_actions: usize) -> Box<dyn Fn(&Tensor) -> (Tensor, Tensor)> {
+fn new_network(
+    p: &nn::Path,
+    n: usize,
+    n_actions: usize,
+) -> Box<dyn Fn(&Tensor) -> (Tensor, Tensor)> {
     let seq = nn::seq()
         .add_fn(|xs| xs.flat_view())
         // .add(nn::linear(p / "l1", 960, 512, Default::default()))
-        .add(nn::linear(p / "l1", (n*n+1) as i64, 32, Default::default()))
+        .add(nn::linear(
+            p / "l1",
+            (n * n + 1) as i64,
+            128,
+            Default::default(),
+        ))
         .add_fn(|xs| xs.relu())
-        .add(nn::linear(p / "l2", 32, 16, Default::default()))
+        .add(nn::linear(p / "l2", 128, 64, Default::default()))
         .add_fn(|xs| xs.relu())
-        ;
-        
-    let critic = nn::linear(p / "cl", 16, 1, Default::default());
+        .add(nn::linear(p / "l3", 64, 32, Default::default()))
+        .add_fn(|xs| xs.relu());
+
+    let critic = nn::linear(p / "c1", 32, 1, Default::default());
     let actor = nn::seq()
         .add(nn::linear(
-            p / "al",
-            16,
+            p / "a1",
+            32,
             n_actions as i64,
             Default::default(),
         ))
@@ -145,19 +156,43 @@ impl TrainSet {
     }
 }
 
+pub fn debug_print_state(n: usize, state: &[u8], action: Option<usize>) {
+    println!("state:");
+    let y = action.map(|a| a / n).unwrap_or(n);
+    let x = action.map(|a| a % n).unwrap_or(n);
+    for i in 0..n {
+        for j in 0..n {
+            let value: u8 = ((state[i * n + j] as f32) / (n as f32 * 2.0) * 255.0) as u8;
+            if i == y && j == x {
+                print!(
+                    "{}",
+                    "O".on_truecolor(value, value, value)
+                        .truecolor(255 - value, 255 - value, 0)
+                );
+            } else {
+                print!("{}", " ".on_truecolor(value, value, value));
+            }
+        }
+        println!("");
+    }
+}
+
 pub fn debug_print_probs(n: usize, probs: Tensor, action: Option<usize>) {
     println!("action:");
     let y = action.map(|a| a / n).unwrap_or(n);
     let x = action.map(|a| a % n).unwrap_or(n);
     for i in 0..n {
         for j in 0..n {
-            let value: u8 = (probs.double_value(&[(i*n+j) as i64]) as f32  * 255.0) as u8;
-            if i==y && j==x {
-                print!("{}", "O".on_truecolor(value,value, value).truecolor(255-value, 255-value, 0));
+            let value: u8 = (probs.double_value(&[(i * n + j) as i64]) as f32 * 255.0) as u8;
+            if i == y && j == x {
+                print!(
+                    "{}",
+                    "O".on_truecolor(value, value, value)
+                        .truecolor(255 - value, 255 - value, 0)
+                );
             } else {
-                print!("{}", " ".on_truecolor(value,value, value));
+                print!("{}", " ".on_truecolor(value, value, value));
             }
-            
         }
         println!("");
     }
@@ -176,7 +211,7 @@ fn main() {
     let device = tch::Device::Cpu;
     let vs = nn::VarStore::new(device);
     let net = new_network(&vs.root(), env.n, env.nn);
-    let mut opt = nn::Adam::default().build(&vs, 1e-4).unwrap();
+    let mut opt = nn::Adam::default().build(&vs, 1e-3).unwrap();
 
     // params
     let epsilon = 0.1;
@@ -197,12 +232,18 @@ fn main() {
         let mut episode_score = 0;
 
         for _step in 0..episode_max_step {
-
-            let state: Tensor = Tensor::from(env.state()).to_kind(tch::Kind::Float).set_requires_grad(false) / 255.0;
-            let state = state
-                .reshape(&[1, env.state_size() as i64]);
+            let debug_state = env.state().to_vec();
+            let state: Tensor = Tensor::from(env.state())
+                .to_kind(tch::Kind::Float)
+                .set_requires_grad(false)
+                / 255.0;
+            let state = state.reshape(&[1, env.state_size() as i64]);
             let (values, probs) = tch::no_grad(|| net(&state)); // [BATCH, 1], [BATCH, N_ACTION]
-            let action: usize = probs.get(0).multinomial(1, true).squeeze1(0).int64_value(&[]) as usize;
+            let action: usize = probs
+                .get(0)
+                .multinomial(1, true)
+                .squeeze1(0)
+                .int64_value(&[]) as usize;
             let reward = env.step(action);
             // println!("reward {}", reward);
             score += reward;
@@ -217,16 +258,24 @@ fn main() {
 
             episode_score += reward;
 
-            if _step==episode_max_step-1 {
-                println!("episode {} step {} reward {} score {} action {} - avg score {}", _episode,_step, reward, score, action, episode_score as f64 / (_step+1) as f64);
+            if _step == episode_max_step - 1 {
+                println!(
+                    "episode {} step {} reward {} score {} action {} - avg score {}",
+                    _episode,
+                    _step,
+                    reward,
+                    score,
+                    action,
+                    episode_score as f64 / (_step + 1) as f64
+                );
                 c.run(python! {
                     wandb.log({"episode_score": 'episode_score})
                 });
-                env.debug_print_state(Some(action));
+                debug_print_state(env.n, debug_state.as_slice(), Some(action));
                 debug_print_probs(env.n, probs.get(0), Some(action));
             }
 
-            if env.is_over () {
+            if env.is_over() {
                 score = 0;
                 env.reset();
             }
@@ -239,16 +288,24 @@ fn main() {
         // update policy
         for _update_step in 0..1000 {
             // https://spinningup.openai.com/en/latest/algorithms/ppo.html
-            // sample
             let batch = data.sample(batchsize);
-            let (values, policy) = net(&batch.states);
+            let (values, probs) = net(&batch.states); // [B, 1], [B, n_actions]
             let advantages = &batch.returns - values.get(0);
-            let ratio = policy.index_select(1, &batch.actions) / batch.probs_of_actions;
+            let ratio = probs.index_select(1, &batch.actions) / batch.probs_of_actions; // [B]
             let first_term = &ratio * &advantages; // larger
             let second_term = ratio.clip(1.0 - epsilon, 1.0 + epsilon) * &advantages;
             let policy_loss = (-first_term.min1(&second_term)).mean(tch::Kind::Float);
             let value_loss = (&advantages * &advantages).mean(tch::Kind::Float);
-            let loss = policy_loss + value_loss;
+
+            let log_probs = probs.log();
+            let policy_entropy = (-log_probs * probs)
+                .sum1(&[-1], false, tch::Kind::Float)
+                .mean(tch::Kind::Float);
+            if _update_step == 999 {
+                println!("{} {} {}", policy_loss.double_value(&[]), value_loss.double_value(&[]), policy_entropy.double_value(&[]));
+            }
+            let loss = policy_loss + value_loss * 0.1 - policy_entropy * 0.01;
+            // opt.backward_step_clip(&loss, 0.5);
             opt.backward_step(&loss);
         }
         // update value
