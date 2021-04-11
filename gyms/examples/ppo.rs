@@ -172,6 +172,8 @@ fn main() {
             ..EmulatorConfig::default()
         },
     );
+    let mut env = gyms::easy_env::EasyEnv2::new(4);
+
     let device = tch::Device::Cpu;
     let vs = nn::VarStore::new(device);
     let net = new_network(&vs.root(), env.available_actions().len());
