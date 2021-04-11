@@ -8,8 +8,7 @@ use clap::Clap;
 
 #[derive(Clap)]
 struct Opts {
-    #[clap(default_value="/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/zaxxon.bin")]
-    rom: std::path::PathBuf,
+    game: String,
 }
 
 // architecture borrowed from https://github.com/LaurentMazare/tch-rs/blob/master/examples/reinforcement-learning/ppo.rs
@@ -27,8 +26,8 @@ fn new_network(p: &nn::Path, n_actions: usize) -> Box<dyn Fn(&Tensor) -> (Tensor
         .add_fn(|xs| xs.relu())
         .add(nn::conv2d(p / "c4", 64, 64, 4, stride(2)))
         .add_fn(|xs| xs.relu().flat_view())
-        // .add(nn::linear(p / "l1", 960, 512, Default::default()))
-        .add(nn::linear(p / "l1", 768, 512, Default::default()))
+        .add(nn::linear(p / "l1", 960, 512, Default::default()))
+        // .add(nn::linear(p / "l1", 768, 512, Default::default()))
         .add_fn(|xs| xs.relu());
     let critic = nn::linear(p / "cl", 512, 1, Default::default());
     let actor = nn::seq()
@@ -163,17 +162,22 @@ impl TrainSet {
 fn main() {
     color_backtrace::install();
     let opts = Opts::parse();
+    let game = opts.game;
+    let path = {
+        let c:inline_python::Context = inline_python::python!{
+            import atari_py
+            path = atari_py.get_game_path('game)
+        };
+        c.get::<String>("path")
+    };
 
     let mut env = AtariEnv::new(
-        opts.rom,
-        // "/home/emppu/.local/lib/python3.9/site-packages/atari_py/atari_roms/carnival.bin",
+        &path,
         EmulatorConfig {
             display_screen: true,
             ..EmulatorConfig::default()
         },
     );
-    let mut env = gyms::easy_env::EasyEnv2::new(4);
-
     let device = tch::Device::Cpu;
     let vs = nn::VarStore::new(device);
     let net = new_network(&vs.root(), env.available_actions().len());
